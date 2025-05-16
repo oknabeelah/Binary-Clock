@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Binary Clock</title>
+        <style>
+            :root {
+                --bg-color: black;
+                --text-color: skyblue;
+                --container-bg-color: #111;
+                --container-shadow-color: skyblue;
+                --settings-bg-color: #222;
+                --inactive-bit-color: gray;
+                --active-bit-color: skyblue;
+                --border-color: skyblue;
+            }
+            body {
+                background-color: var(--bg-color);
+                color: var(--text-color);
+                font-family: monospace;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+                margin: 0;
+                transition: background-color 0.3s, color 0.3s;
+            }
+            .container {
+                background-color: var(--container-bg-color);
+                border-radius: 12px;
+                padding: 20px;
+                box-shadow: 0 0 10px var(--container-shadow-color);
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                min-width: 320px; /* Adjusted for potentially wider 6x4 with headers */
+                position: relative;
+                transition: background-color 0.3s, box-shadow 0.3s;
+            }
+            .header {
+                width: 100%;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 15px;
+            }
+            .title {
+                font-size: 1.5em;
+            }
+            .settings-icon {
+                cursor: pointer;
+                font-size: 1.5em;
+            }
+            .settings-panel {
+                background-color: var(--settings-bg-color);
+                border: 1px solid var(--border-color);
+                border-radius: 8px;
+                padding: 15px;
+                margin-top: 10px;
+                margin-bottom: 15px;
+                width: calc(100% - 30px);
+                box-sizing: border-box;
+                display: none; /* Hidden by default */
+                flex-direction: column;
+                gap: 10px;
+            }
+            .settings-panel label {
+                display: block;
+                margin-bottom: 5px;
+                font-size: 0.9em;
+            }
+            .settings-panel select,
+            .settings-panel input[type="checkbox"] {
+                background-color: #333;
+                color: var(--text-color);
+                border: 1px solid var(--border-color);
+                border-radius: 4px;
+                padding: 8px;
+                width: 100%;
+                box-sizing: border-box;
+            }
+            .settings-panel fieldset {
+                border: 1px solid var(--border-color);
+                border-radius: 4px;
+                padding: 10px;
+                margin: 0;
+            }
+            .settings-panel legend {
+                padding: 0 5px;
+                font-size: 0.9em;
+            }
+            .settings-panel .radio-group label {
+                display:  inline-block;
+                margin-right: 10px;
+                font-size: 1em;
+            }
+            .settings-panel input[type="radio"] {
+                margin-right: 5px;
+                vertical-align: middle;
+            }
+            .clock-wrapper {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 5px; /* Gap btw headers and clock*/
+            }
+            .bit-headers {
+                display: flex;
+                gap: 5px;
+                font-size: 0.7em; /* Smaller font for headers */
+                margin-bottom: 5px;
+                color: var(--text-color);
+            }
+            .bit-headers .header-bit, .bit-headers .header-spacer {
+                width: 20px; /* Should match .bit width */
+                text-align: center;
+            }
+            .bit-headers.grid-headers { /* For 6x4 mode -- both modes should have tho*/
+                display: grid;
+                grid-template-columns: repeat(6, 1fr); /* 6 digits */
+                gap: 5px; /* Gap between digit groups */
+                justify-items: center;
+            }
+            .bit-headers.grid-headers .header-digit-group {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+            .bit-headers.grid-headers .header-bit-value { /* 8 4 2 1 labels */
+                font-size: 0.6em;
+                height: 20px; /* Should match .bit height */
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            #clock { /* This will be styled by JS based on mode */
+                font-size: 2em; /* Base for bit size reference, actual size by .bit */
+                gap: 10px;
+                /* JS will set display: flex or display: grid */
+            }
+            #clock.row-mode { /* Styles for 6x3 Row Mode */
+                display: flex;
+                flex-direction: column;
+            }
+            #clock.row-mode .row {
+                display: flex;
+                gap: 5px;
+            }          
+            #clock.grid-mode { /* Styles for 6x4 Grid Mode */
+                display: grid;
+                grid-template-columns: repeat(6, 1fr); /* 6 digits HHMMSS */
+                /* grid-template-rows dynamically set if headers are inside or fixed 4 */
+                gap: 5px;
+            }
+            .bit {
+                width: 20px;
+                height: 20px;
+                background: var(--inactive-bit-color);
+                border-radius: 5px;
+                transition: background-color 0.3s;
+            }
+            .bit.on {
+                background: var(--active-bit-color);
+            }
+        </style>
+    </head>
+
+    <body>
+        <div class="container">
+        <div class="header">
+            <div class="title">Binary Clock</div>
+            <div class="settings-icon" onclick="toggleSettingsPanel()">⚙️</div>
+        </div>
+
+        <div class="settings-panel" id="settingsPanel">
+            <div>
+                <label for="timezone">Timezone:</label>
+                <select id="timezone" onchange="settingChanged()">
+                <option value="local">Local</option>
+                <option value="UTC">UTC</option>
+                <option value="America/New_York">New York</option>
+                <option value="Europe/London">London</option>
+                <option value="Asia/Tokyo">Tokyo</option>
+                <option value="Australia/Sydney">Sydney</option>
+                </select>
+            </div>
+
+            <fieldset>
+                <legend>Clock Mode</legend>
+                <div class="radio-group">
+                    <label><input type="radio" name="clockMode" value="6by3" onchange="settingChanged()"> Row (6x3)</label>
+                    <label><input type="radio" name="clockMode" value="6by4" onchange="settingChanged()"> Grid BCD (6x4)</label>
+                </div>
+            </fieldset>
+            
+            <div>
+                <label for="theme">Theme:</label>
+                <select id="theme" onchange="settingChanged()"> /*add a color selection grid ?*/
+                <option value="skyblue">Sky Blue</option>
+                <option value="forestgreen">Forest Green</option>
+                <option value="firered">Fire Red</option>
+                <option value="goldenrod">Goldenrod</option>
+                <option value="plain">Plain (White/Black)</option> 
+                </select>
+            </div>
+
+            <div>
+                <label for="showBitValues">
+                    <input type="checkbox" id="showBitValues" onchange="settingChanged()"> Show Bit Values
+                </label>
+            </div>
+        </div>
+
+        <div class="clock-wrapper">
+            <div id="clockHeaders" class="bit-headers"></div>
+            <div id="clock"></div>
+        </div>
+    </div>
+
+    <script>
+        const clockElement = document.getElementById('clock');
+        const clockHeadersElement = document.getElementById('clockHeaders');
+        const settingsPanel = document.getElementById('settingsPanel');
+        const timezoneSelect = document.getElementById('timezone');
+        const themeSelect = document.getElementById('theme');
+        const showBitValuesCheckbox = document.getElementById('showBitValues');
+        const modeRadios = document.querySelectorAll('input[name="clockMode"]');
+
+        let settings = {
+            timezone: 'local',
+            mode: '6by4', //6by3 or 6by4
+            theme: 'skyblue',
+            showBitValues: false
+        };
+
+        const themes = {
+            skyblue: {
+                '--bg-color': 'black',
+                '--text-color': 'skyblue',
+                '--container-bg-color': '#111',
+                '--container-shadow-color': 'skyblue',
+                '--settings-bg-color': '#222',
+                '--inactive-bit-color': 'gray',
+                '--active-bit-color': 'skyblue',
+                '--border-color': 'skyblue',
+            },
+            forestgreen: {
+                '--bg-color': '#122',
+                '--text-color': 'lightgreen',
+                '--container-bg-color': '#232',
+                '--container-shadow-color': 'green',
+                '--settings-bg-color': '#343',
+                '--inactive-bit-color': '#555',
+                '--active-bit-color': 'limegreen',
+                '--border-color': 'green',
+            },
+            firered: {
+                '--bg-color': '#211',
+                '--text-color': 'orangered',
+                '--container-bg-color': '#311',
+                '--container-shadow-color': 'red',
+                '--settings-bg-color': '#411',
+                '--inactive-bit-color': '#633',
+                '--active-bit-color': 'red',
+                '--border-color': 'darkred',
+            },
+            goldenrod: {
+                '--bg-color': '#220',
+                '--text-color': 'gold',
+                '--container-bg-color': '#331',
+                '--container-shadow-color': 'goldenrod',
+                '--settings-bg-color': '#441',
+                '--inactive-bit-color': '#664',
+                '--active-bit-color': 'gold',
+                '--border-color': 'darkgoldenrod',
+            },
+            plain: {
+                '--bg-color': 'white',
+                '--text-color': 'black',
+                '--container-bg-color': '#f0f0f0',
+                '--container-shadow-color': '#ccc',
+                '--settings-bg-color': '#e0e0e0',
+                '--inactive-bit-color': '#ccc',
+                '--active-bit-color': 'black',
+                '--border-color': '#999',
+            }
+        };
+
+        function applyTheme() {
+            const selectedTheme = themes[settings.theme];
+            for (const [property, value] of Object.entries(selectedTheme)) {
+                document.documentElement.style.setProperty(property, value);
+            }
+        }
+        function getTimeInTimezone(timezone) {
+            const now = new Date();
+            if (timezone === 'local') {
+                return {
+                    h: now.getHours(),
+                    m: now.getMinutes(),
+                    s: now.getSeconds(),
+                    hStr: now.getHours().toString().padStart(2, '0'),
+                    mStr: now.getMinutes().toString().padStart(2, '0'),
+                    sStr: now.getSeconds().toString().padStart(2, '0'),
+                };
+            }
+
+            const options = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false, timeZone: timezone };
+            const formatter = new Intl.DateTimeFormat('en-US', options); //huhhh 
+            const parts = formatter.formatToParts(now);
+
+            const timeMap = { hour: 0, minute: 0, second: 0};
+            for (const part of parts) {
+                if (part.type !== 'literal') {
+                    timeMap[part.type] = parseInt(part.value, 10);
+                }
+            }
+            return {
+                h: timeMap.hour,
+                m: timeMap.minute,
+                s: timeMap.second,
+                hStr: timeMap.hour.toString().padStart(2, '0'),
+                mStr: timeMap.minute.toString().padStart(2, '0'),
+                sStr: timeMap.second.toString().padStart(2, '0'),
+            };
+        }
+        function render6by3(h, m, s) {
+            clockElement.className = 'row-mode'; // St class for specific styling
+            clockElement.innerHTML = '';
+            clockHeadersElement.innerHTML = '';
+            clockHeadersElement.className = 'bit-headers';
+
+            if (settings.showBitValues) {
+                const headerValues = [32, 16, 8, 4, 2, 1];
+                headerValues.forEach(val => {
+                    const div = document.createElement('div');
+                    div.className = 'header-bit';
+                    div.textContent = val;
+                    clockHeadersElement.appendChild(div);
+                });
+            }
+
+            [h.toString(2).padStart(6, '0'),
+             m.toString(2).padStart(6, '0'),
+             s.toString(2).padStart(6, '0')
+            ].forEach(timePart => {
+                const row = document.createElement('div');
+                row.className = 'row';
+                for (let bit of timePart) {
+                    const div = document.createElement('div');
+                    div.className = 'bit' + (bit === '1' ? ' on' : '');
+                    row.appendChild(div);
+                }
+                clockElement.appendChild(row);
+            });
+        }
+        function render6by4(hStr, mStr, sStr) {
+            clockElement.className = 'grid-mode'; // Set class for specific styling
+            clockElement.innerHTML = '';
+            clockHeadersElement.innerHTML = '';
+            clockHeadersElement.className = 'bit-headers grid-headers';
+
+            const digits = [...hStr, ...mStr, ...sStr]; //hhmmss
+
+            if (settings.showBitValues) {
+                const bitWeightLabels = [8, 4, 2, 1];
+                const labels = ['H', 'H', 'M', 'M', 'S', 'S'];
+                for(let i=0; i < 6; i++) {
+                    const headerLabelDiv = document.createElement('div');
+                    headerLabelDiv.className = 'header-bit';
+                    headerLabelDiv.textContent = labels[i] + ((i % 2) + 1); //H1, H2, M1 etc
+                    clockHeadersElement.appendChild(headerLabelDiv);
+                }
+                /*
+                This logic for bit value headers (8,4,2,1) under each H1,H2 needs adjustment.
+                 Simpler: display 8 4 2 1 once to the side or make clock 5 rows.
+                 For now, the H1 H2 etc labels are above.
+                 To put 8,4,2,1 for each column *above* the bits, you'd make the grid 5 rows.
+                 Let's try to display 8,4,2,1 to the left or assume user knows BCD values
+                */
+            }
+
+            // This renders bits column, effectively
+            for (let bitPosition = 0; bitPosition < 4; bitPosition++) { //for each bit (8, 4, 2, 1) from top to bottm
+                for (let digit of digits) { // For each digit (H1, H2, M1, M2, S1, S2)
+                    const binaryOfDigit = parseInt(digit).toString(2).padStart(4, '0');
+                    const currentBit = binaryOfDigit[bitPosition];
+                    const div = document.createElement('div');
+                    div.className = 'bit' + (currentBit === '1' ? ' on' : '');
+                    clockElement.appendChild(div);
+                }
+            }
+        }
+        function updateClock() {
+            const time = getTimeInTimezone(settings.timezone);
+
+            if (settings.mode === '6by3') {
+                render6by3(time.h, time.m, time.s);
+            }
+            else if (settings.mode === '6by4') {
+            // CSS Grid fills row by row. So we construct column by column.
+            // We need to adjust render6x4 to build the grid correctly or change how it fills.
+            // The original clock6by4.html script builds the elements in the correct order for CSS grid.
+        
+                clockElement.className = 'grid-mode';
+                clockElement.innerHTML = ''; // Clear previous bits
+                clockHeadersElement.innerHTML = ''; // Clear previous headers
+                clockHeadersElement.className = 'bit-headers'; // Reset class
+
+                const digits = [...time.hStr, ...time.mStr, ...time.sStr]; // array of 6 digit strings [hhmmss]
+
+                if (settings.showBitValues) {
+                    clockHeadersElement.classList.add('grid-headers'); //use specific styles for grid headers
+                    const colLabels = ['H₁','H₂','M₁','M₂','S₁','S₂'];
+                    colLabels.forEach(label => {
+                        const div = document.createElement('div');
+                        div.className = 'header-bit'; //use this class for consistent sizing
+                        div.textContent = label;
+                        clockHeadersElement.appendChild(div);
+                    });
+                     // Optionally, add 8,4,2,1 labels vertically to the left of the clock,
+                     // or ensure the user understands BCD bit weights for the grid.
+                     // For simplicity, current headers are just H1, H2...
+                }
+
+                // The grid will be 4 rows (for bits 8,4,2,1) and 6 columns (for HHMMSS digits)
+                // Iterate by row (bit significance), then by column (digit)
+                for (let rowIndex = 0; rowIndex < 4; rowIndex++) { // For each bit position (0=8, 1=4, 2=2, 3=1)
+                    for (let digitIndex = 0; digitIndex < digits.length; digitIndex++) { // For each digit column
+                        const digitValue = digits[digitIndex];
+                        const binaryRepresentation = parseInt(digitValue).toString(2).padStart(4, '0');
+                        const bitState = binaryRepresentation[rowIndex]; // Get the bit for the current row
+
+                        const bitDiv = document.createElement('div');
+                        bitDiv.className = 'bit' + (bitState === '1' ? ' on' : '');
+                        clockElement.appendChild(bitDiv);
+                    }
+                }
+            }
+        }
+        function toggleSettingsPanel() {
+            settingsPanel.style.display = settingsPanel.style.display === 'none' ? 'flex' : 'none';
+        }
+        function settingChanged() {
+            settings.timezone = timezoneSelect.value;
+            settings.theme = themeSelect.value;
+            settings.showBitValues = showBitValuesCheckbox.checked;
+      
+            const selectedModeRadio = document.querySelector('input[name="clockMode"]:checked');
+            if (selectedModeRadio) {
+                settings.mode = selectedModeRadio.value;
+            }
+      
+            saveSettings();
+            applyTheme();
+            updateClock(); // Re-render clock with new settings
+        }
+        function saveSettings() {
+            localStorage.setItem('binaryClockSettings', JSON.stringify(settings));
+        }
+        function loadSettings() {
+            const savedSettings = localStorage.getItem('binaryClockSettings');
+            if (savedSettings) {
+                settings = JSON.parse(savedSettings);
+            }
+            // Apply loaded settings to UI elements
+            timezoneSelect.value = settings.timezone;
+            themeSelect.value = settings.theme;
+            showBitValuesCheckbox.checked = settings.showBitValues;
+      
+            const modeRadioToSelect = document.querySelector(`input[name="clockMode"][value="${settings.mode}"]`);
+            if (modeRadioToSelect) {
+                modeRadioToSelect.checked = true;
+            } 
+            else { // Default if saved mode is invalid
+                document.querySelector('input[name="clockMode"][value="6by3"]').checked = true;
+                settings.mode = '6by3';
+            }
+        }
+
+        //Initial setup
+        loadSettings();
+        applyTheme();
+        updateClock();
+        setInterval(updateClock, 1000);
+    </script>
+    </body>
+    </html>
