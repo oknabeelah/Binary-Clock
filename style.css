@@ -209,7 +209,7 @@ body {
     width: auto;
 }
 
-.bit-headers {
+#clockHeadersTop {
     /* This is #clockHeadersTop */
     display: flex;
     gap: 5px;
@@ -217,31 +217,36 @@ body {
     color: var(--text-color);
     min-height: 1.2em;
     /* Ensure space even if empty */
-    justify-content: center;
     /* Center the headers */
     /*width: 100%; */
     /* Take full width of its parent (.clock-display-area) */
     box-sizing: border-box;
 }
 
-.bit-headers.grid-headers-top {
-    /* For H1 H2 M1 M2 S1 S2 */
-    display: grid;
-    /* Will be 1 row, 6 columns */
-    grid-template-columns: repeat(6, 1fr);
-    gap: 5px;
-    justify-items: center;
-    width: auto;
-    padding: 0 calc((100% - (6 * 20px + 5 * 5px)) / 2);
+/* Specific for 6x3 Row Mode Top Headers (32 16 8 4 2 1) */
+#clockHeadersTop.row-mode-top {
+    display: flex; /* This is good */
+    justify-content: flex-start; /* Align items to the start of this flex container */
+    /* The container itself will be centered by .clock-display-area's align-items:center */
+    gap: 5px; /* Matches bit gap */
 }
-
-.bit-headers.grid-headers-top .header-bit {
-    width: 20px;
+#clockHeadersTop.row-mode-top .header-bit {
+    width: 20px; /* Matches .bit width */
     text-align: center;
 }
 
-.bit-headers.row-mode-top .header-bit {
-    width: 20px;
+/* Specific for 6x4 Grid Mode Top Headers (H1 H2 M1 M2 S1 S2) */
+#clockHeadersTop.grid-headers-top {
+    display: grid;
+    grid-template-columns: repeat(6, 20px); /* CRITICAL: Match .clock-core.grid-mode */
+    gap: 5px; /* CRITICAL: Match .clock-core.grid-mode */
+    /* justify-items: center; /* This is default for grid and fine */
+    /* width: auto; /* This is default for grid and fine */
+    /* padding: 0 calc(...); /* REMOVE THIS complex padding */
+}
+
+#clockHeadersTop.grid-headers-top .header-bit {
+    width: 20px; /* Ensures it fills the grid cell if content is smaller */
     text-align: center;
 }
 
@@ -265,6 +270,15 @@ body {
     color: var(--text-color);
     /* padding-top: 2px; */
     /* Align with first row of bits visually */
+}
+
+.bit-labels-left .label-bit-value {
+    width: 20px; /* Or 'auto' and rely on padding for spacing */
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 5px;
 }
 
 .bit-labels-left.grid-mode-left {}
@@ -320,28 +334,18 @@ body {
     /* Ensure space even if empty */
 }
 
-.bit-labels-bottom.row-mode-bottom {
-    /* Specific styles for H M S for 6x3 */
-    /* If H, M, S are to be vertically aligned with each row of bits in 6x3,
-       this approach won't work. They'd need to be inside .clock-main-content
-       and styled with `flex-direction: column` and aligned next to the `clock-core.row-mode`.
-       The current JS puts H M S into .bit-labels-bottom, so they appear under the whole 6x3 block.
-    */
-    /* To make H M S appear stacked vertically *below* the clock: */
-    /* flex-direction: column; */
-    align-items: center;
-    /* Center them vertically if stacked */
-    /* gap: 0px; */
-    /* Reduce gap if stacked closely */
-
+#clockLabelsBottom.row-mode-bottom {
+    display: flex; /* Added to ensure its children (.label-time-part) behave as flex items if needed */
+    flex-direction: column;
+    align-items: center; 
+    gap: 5px; /* Consistent gap with other elements */
 }
-
-.bit-labels-bottom .label-time-part {
+#clockLabelsBottom .label-time-part {
     height: 20px;
     display: flex;
     align-items: center;
-    /* padding-left: 5px; -- handled by gap now */
 }
+
 
 .bit {
     width: 20px;
@@ -389,16 +393,15 @@ body {
     .settings-panel input[type="checkbox"] {
         padding: 6px; /* Slightly smaller padding */
     }
-    /* Adjust bit and header sizes for smaller screens */
-    /* Option 1: Fixed smaller size (simpler) */
-    .bit,
-    .bit-headers .header-bit,
-    .bit-labels-left .label-bit-value {
-        width: 15px;  /* Reduce bit width */
-        height: 15px; /* Reduce bit height */
-    }
     .bit { /* Specifically for the bit's border-radius */
         border-radius: 3px;
+    }
+    .bit,
+    #clockHeadersTop.row-mode-top .header-bit,
+    #clockHeadersTop.grid-headers-top .header-bit,
+    .bit-labels-left .label-bit-value { /* label-bit-value also needs height adjusted below */
+        width: 15px;
+        height: 15px;
     }
 
     /* If using Option 1, also adjust grid column/row templates if they use fixed px values based on bits */
@@ -418,41 +421,12 @@ body {
         grid-template-columns: repeat(6, 15px); /* Match new bit width */
         /* gap: 5px; */
     }
-     .bit-headers.grid-headers-top .header-bit { /* Already covered by general .header-bit */
-        /* width: 15px; */
-        width: 15px; /* Ensure it takes the full cell width */
-        text-align: center;
-    }
-     .bit-headers.row-mode-top .header-bit {  /* Already covered by general .header-bit */
-        /* width: 15px; */
-        width: 15px; /* Should match .bit width */
-        text-align: center;
-    }
+
     .bit-labels-left .label-bit-value {
         height: 15px; /* Match new bit height */
     }
     .bit-labels-bottom .label-time-part {
         height: 15px; /* Match new bit height */
-    }
-
-
-    /* Option 2: Using CSS variables for bit size (more advanced, allows dynamic JS changes too) */
-    /* If you choose this, define --bit-size and --bit-gap in :root and use them everywhere,
-       then just change the variable values here.
-       Example:
-       :root { --bit-size: 20px; --bit-gap: 5px; }
-       .bit { width: var(--bit-size); height: var(--bit-size); }
-       #clock.grid-mode { grid-template-columns: repeat(6, var(--bit-size)); gap: var(--bit-gap); }
-       
-       In media query:
-       :root { --bit-size: 15px; --bit-gap: 3px; }
-    */
-
-    /* Adjust font sizes for labels if they become too cramped */
-    .bit-headers,
-    .bit-labels-left,
-    .bit-labels-bottom {
-        font-size: 0.6em; /* Slightly smaller label font */
     }
 
     /* If the settings panel content is too wide */
@@ -483,7 +457,8 @@ body {
     }
 
     .bit,
-    .bit-headers .header-bit,
+    #clockHeadersTop.row-mode-top .header-bit,
+    #clockHeadersTop.grid-headers-top .header-bit,
     .bit-labels-left .label-bit-value {
         width: 12px;
         height: 12px;
@@ -495,12 +470,15 @@ body {
         grid-template-columns: repeat(6, 12px);
         grid-template-rows: repeat(4, 12px);
     }
+    #clockHeadersTop,
+    #clockHeadersTop.grid-headers-top,
+    .clock-core,
     .clock-core.row-mode .row,
-    .bit-headers,
     .bit-labels-left,
-    .bit-labels-bottom {
+    #clockLabelsBottom.row-mode-bottom {
         gap: 2px;
     }
+
     #clockHeadersTop.grid-headers-top {
         grid-template-columns: repeat(6, 12px);
     }
@@ -508,11 +486,7 @@ body {
     .bit-labels-bottom .label-time-part {
         height: 12px;
     }
-    .bit-headers,
-    .bit-labels-left,
-    .bit-labels-bottom {
-        font-size: 0.55em;
-    }
+    
     .bit {
         width: 12px;
         height: 12px;
