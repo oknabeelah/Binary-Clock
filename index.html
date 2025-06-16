@@ -3,166 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <title>Binary Clock</title>
-        <style>
-            :root {
-                --bg-color: black;
-                --text-color: skyblue;
-                --container-bg-color: #111;
-                --container-shadow-color: skyblue;
-                --settings-bg-color: #222;
-                --inactive-bit-color: gray;
-                --active-bit-color: skyblue;
-                --border-color: skyblue;
-            }
-            body {
-                background-color: var(--bg-color);
-                color: var(--text-color);
-                font-family: monospace;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                height: 100vh;
-                margin: 0;
-                transition: background-color 0.3s, color 0.3s;
-            }
-            .container {
-                background-color: var(--container-bg-color);
-                border-radius: 12px;
-                padding: 20px;
-                box-shadow: 0 0 10px var(--container-shadow-color);
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                min-width: 320px; /* Adjusted for potentially wider 6x4 with headers */
-                position: relative;
-                transition: background-color 0.3s, box-shadow 0.3s;
-            }
-            .header {
-                width: 100%;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                margin-bottom: 15px;
-            }
-            .title {
-                font-size: 1.5em;
-            }
-            .settings-icon {
-                cursor: pointer;
-                font-size: 1.5em;
-            }
-            .settings-panel {
-                background-color: var(--settings-bg-color);
-                border: 1px solid var(--border-color);
-                border-radius: 8px;
-                padding: 15px;
-                margin-top: 10px;
-                margin-bottom: 15px;
-                width: calc(100% - 30px);
-                box-sizing: border-box;
-                display: none; /* Hidden by default */
-                flex-direction: column;
-                gap: 10px;
-            }
-            .settings-panel label {
-                display: block;
-                margin-bottom: 5px;
-                font-size: 0.9em;
-            }
-            .settings-panel select,
-            .settings-panel input[type="checkbox"] {
-                background-color: #333;
-                color: var(--text-color);
-                border: 1px solid var(--border-color);
-                border-radius: 4px;
-                padding: 8px;
-                width: 100%;
-                box-sizing: border-box;
-            }
-            .settings-panel fieldset {
-                border: 1px solid var(--border-color);
-                border-radius: 4px;
-                padding: 10px;
-                margin: 0;
-            }
-            .settings-panel legend {
-                padding: 0 5px;
-                font-size: 0.9em;
-            }
-            .settings-panel .radio-group label {
-                display:  inline-block;
-                margin-right: 10px;
-                font-size: 1em;
-            }
-            .settings-panel input[type="radio"] {
-                margin-right: 5px;
-                vertical-align: middle;
-            }
-            .clock-wrapper {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                gap: 5px; /* Gap btw headers and clock*/
-            }
-            .bit-headers {
-                display: flex;
-                gap: 5px;
-                font-size: 0.7em; /* Smaller font for headers */
-                margin-bottom: 5px;
-                color: var(--text-color);
-            }
-            .bit-headers .header-bit, .bit-headers .header-spacer {
-                width: 20px; /* Should match .bit width */
-                text-align: center;
-            }
-            .bit-headers.grid-headers { /* For 6x4 mode -- both modes should have tho*/
-                display: grid;
-                grid-template-columns: repeat(6, 1fr); /* 6 digits */
-                gap: 5px; /* Gap between digit groups */
-                justify-items: center;
-            }
-            .bit-headers.grid-headers .header-digit-group {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-            }
-            .bit-headers.grid-headers .header-bit-value { /* 8 4 2 1 labels */
-                font-size: 0.6em;
-                height: 20px; /* Should match .bit height */
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-            #clock { /* This will be styled by JS based on mode */
-                font-size: 2em; /* Base for bit size reference, actual size by .bit */
-                gap: 10px;
-                /* JS will set display: flex or display: grid */
-            }
-            #clock.row-mode { /* Styles for 6x3 Row Mode */
-                display: flex;
-                flex-direction: column;
-            }
-            #clock.row-mode .row {
-                display: flex;
-                gap: 5px;
-            }          
-            #clock.grid-mode { /* Styles for 6x4 Grid Mode */
-                display: grid;
-                grid-template-columns: repeat(6, 1fr); /* 6 digits HHMMSS */
-                /* grid-template-rows dynamically set if headers are inside or fixed 4 */
-                gap: 5px;
-            }
-            .bit {
-                width: 20px;
-                height: 20px;
-                background: var(--inactive-bit-color);
-                border-radius: 5px;
-                transition: background-color 0.3s;
-            }
-            .bit.on {
-                background: var(--active-bit-color);
-            }
-        </style>
+        <link rel="stylesheet" href="style.css">
     </head>
 
     <body>
@@ -200,6 +41,7 @@
                 <option value="forestgreen">Forest Green</option>
                 <option value="firered">Fire Red</option>
                 <option value="goldenrod">Goldenrod</option>
+                <option value="pink">Pink</option>
                 <option value="plain">Plain (White/Black)</option> 
                 </select>
             </div>
@@ -210,16 +52,24 @@
                 </label>
             </div>
         </div>
-
-        <div class="clock-wrapper">
-            <div id="clockHeaders" class="bit-headers"></div>
-            <div id="clock"></div>
+        <!-- Inside .container, replace the existing .clock-wrapper -->
+        <div class="clock-display-area">
+            <div id="clockHeadersTop" class="bit-headers"></div> <!-- For 32,16.. or H1,H2.. -->
+                <div class="clock-main-content">
+                    <div id="clockLabelsLeft" class="bit-labels-left"></div> <!-- For 8,4,2,1 -->
+                    <div id="clock" class="clock-core"></div> <!-- The actual bits -->
+                </div>
+                <div id="clockLabelsBottom" class="bit-labels-bottom"></div> <!-- For H, M, S in 6x3 mode -->
+            </div>
         </div>
-    </div>
 
     <script>
-        const clockElement = document.getElementById('clock');
-        const clockHeadersElement = document.getElementById('clockHeaders');
+        const clockElement = document.getElementById('clock'); // THIS is now .clock-core
+        const clockHeadersTopElement = document.getElementById('clockHeadersTop');
+        //const clockHeadersElement = document.getElementById('clockHeaders'); //maybe clear?
+        const clockLabelsLeftElement = document.getElementById('clockLabelsLeft');
+        const clockLabelsBottomElement = document.getElementById('clockLabelsBottom'); // For H, M, S in row mode
+        // ... rest of the const declarations
         const settingsPanel = document.getElementById('settingsPanel');
         const timezoneSelect = document.getElementById('timezone');
         const themeSelect = document.getElementById('theme');
@@ -228,7 +78,7 @@
 
         let settings = {
             timezone: 'local',
-            mode: '6by4', //6by3 or 6by4
+            mode: '6by3', //6by3 or 6by4
             theme: 'skyblue',
             showBitValues: false
         };
@@ -283,6 +133,16 @@
                 '--inactive-bit-color': '#ccc',
                 '--active-bit-color': 'black',
                 '--border-color': '#999',
+            },
+            pink: { // <<<< NEW THEME
+            '--bg-color': '#302028', // Dark pinkish background
+            '--text-color': 'hotpink',
+            '--container-bg-color': '#403038',
+            '--container-shadow-color': 'deeppink',
+            '--settings-bg-color': '#504048',
+            '--inactive-bit-color': '#777',
+            '--active-bit-color': 'hotpink',
+            '--border-color': 'deeppink',
             }
         };
 
@@ -325,19 +185,33 @@
             };
         }
         function render6by3(h, m, s) {
-            clockElement.className = 'row-mode'; // St class for specific styling
+            clockElement.className = 'clock-core row-mode'; // Use .clock-core
             clockElement.innerHTML = '';
-            clockHeadersElement.innerHTML = '';
-            clockHeadersElement.className = 'bit-headers';
+            clockHeadersTopElement.innerHTML = '';
+            clockLabelsLeftElement.innerHTML = '';
+            clockLabelsBottomElement.innerHTML = '';
 
             if (settings.showBitValues) {
+                clockHeadersTopElement.className = 'bit-headers row-mode-top';
                 const headerValues = [32, 16, 8, 4, 2, 1];
                 headerValues.forEach(val => {
                     const div = document.createElement('div');
                     div.className = 'header-bit';
                     div.textContent = val;
-                    clockHeadersElement.appendChild(div);
+                    clockHeadersTopElement.appendChild(div);
+                });    
+                clockLabelsBottomElement.className = 'bit-labels-bottom row-mode-bottom';
+
+                ['H', 'M', 'S'].forEach(label => {
+                    const div = document.createElement('div');
+                    div.className = 'label-time-part';
+                    div.textContent = label;
+                    clockLabelsBottomElement.appendChild(div);
                 });
+            }
+            else {
+                clockHeadersTopElement.className = 'bit-headers'; 
+                clockLabelsBottomElement.className = 'bit-labels-bottom'; 
             }
 
             [h.toString(2).padStart(6, '0'),
@@ -394,6 +268,17 @@
         function updateClock() {
             const time = getTimeInTimezone(settings.timezone);
 
+            // Clear all dynamic areas at the beginning
+            clockHeadersTopElement.innerHTML = '';
+            clockLabelsLeftElement.innerHTML = '';
+            clockLabelsBottomElement.innerHTML = '';
+            clockElement.innerHTML = '';
+
+            // Reset classes to avoid conflicts
+            clockHeadersTopElement.className = 'bit-headers';
+            clockLabelsLeftElement.className = 'bit-labels-left';
+            clockLabelsBottomElement.className = 'bit-labels-bottom';
+
             if (settings.mode === '6by3') {
                 render6by3(time.h, time.m, time.s);
             }
@@ -402,25 +287,31 @@
             // We need to adjust render6x4 to build the grid correctly or change how it fills.
             // The original clock6by4.html script builds the elements in the correct order for CSS grid.
         
-                clockElement.className = 'grid-mode';
-                clockElement.innerHTML = ''; // Clear previous bits
-                clockHeadersElement.innerHTML = ''; // Clear previous headers
-                clockHeadersElement.className = 'bit-headers'; // Reset class
+                clockElement.className = 'clock-core grid-mode'; // Use .clock-core
 
                 const digits = [...time.hStr, ...time.mStr, ...time.sStr]; // array of 6 digit strings [hhmmss]
 
                 if (settings.showBitValues) {
-                    clockHeadersElement.classList.add('grid-headers'); //use specific styles for grid headers
+                    clockHeadersTopElement.className = 'bit-headers grid-headers-top';
                     const colLabels = ['H₁','H₂','M₁','M₂','S₁','S₂'];
                     colLabels.forEach(label => {
                         const div = document.createElement('div');
                         div.className = 'header-bit'; //use this class for consistent sizing
-                        div.textContent = label;
-                        clockHeadersElement.appendChild(div);
+                        clockHeadersTopElement.appendChild(div).textContent = label;
                     });
-                     // Optionally, add 8,4,2,1 labels vertically to the left of the clock,
-                     // or ensure the user understands BCD bit weights for the grid.
-                     // For simplicity, current headers are just H1, H2...
+                    // Optionally, add 8,4,2,1 labels vertically to the left of the clock,
+                    // or ensure the user understands BCD bit weights for the grid.
+                    // For simplicity, current headers are just H1, H2...
+                    
+                    // Left Labels (8 4 2 1)
+                    clockLabelsLeftElement.className = 'bit-labels-left grid-mode-left';
+                    const rowLabels = [8, 4, 2, 1];
+                    rowLabels.forEach(label => {
+                        const div = document.createElement('div');
+                        div.className = 'label-bit-value';
+                        div.textContent = label;
+                        clockLabelsLeftElement.appendChild(div);
+                    });
                 }
 
                 // The grid will be 4 rows (for bits 8,4,2,1) and 6 columns (for HHMMSS digits)

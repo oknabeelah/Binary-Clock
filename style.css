@@ -1,0 +1,356 @@
+:root {
+    --bg-color: black;
+    --text-color: skyblue;
+    --container-bg-color: #111;
+    --container-shadow-color: skyblue;
+    --settings-bg-color: #222;
+    --inactive-bit-color: gray;
+    --active-bit-color: skyblue;
+    --border-color: skyblue;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: monospace;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.container {
+    background-color: var(--container-bg-color);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 0 10px var(--container-shadow-color);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 320px;
+    /* Adjusted for potentially wider 6x4 with headers */
+    position: relative;
+    transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+.header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.title {
+    font-size: 1.5em;
+}
+
+.settings-icon {
+    cursor: pointer;
+    font-size: 1.5em;
+}
+
+.settings-panel {
+    background-color: var(--settings-bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 15px;
+    margin-top: 10px;
+    margin-bottom: 15px;
+    width: calc(100% - 30px);
+    box-sizing: border-box;
+    display: none;
+    /* Hidden by default */
+    flex-direction: column;
+    gap: 10px;
+}
+
+.settings-panel label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 0.9em;
+}
+
+.settings-panel select,
+.settings-panel input[type="checkbox"] {
+    background-color: #333;
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 8px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.settings-panel fieldset {
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 10px;
+    margin: 0;
+}
+
+.settings-panel legend {
+    padding: 0 5px;
+    font-size: 0.9em;
+}
+
+.settings-panel .radio-group label {
+    display: inline-block;
+    margin-right: 10px;
+    font-size: 1em;
+}
+
+.settings-panel input[type="radio"] {
+    margin-right: 5px;
+    vertical-align: middle;
+}
+
+.clock-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    /* Gap btw headers and clock*/
+}
+
+.bit-headers {
+    display: flex;
+    gap: 5px;
+    font-size: 0.7em;
+    /* Smaller font for headers */
+    margin-bottom: 5px;
+    color: var(--text-color);
+}
+
+.bit-headers .header-bit,
+.bit-headers .header-spacer {
+    width: 20px;
+    /* Should match .bit width */
+    text-align: center;
+}
+
+.bit-headers.grid-headers {
+    /* For 6x4 mode -- both modes should have tho*/
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    /* 6 digits */
+    gap: 5px;
+    /* Gap between digit groups */
+    justify-items: center;
+}
+
+.bit-headers.grid-headers .header-digit-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.bit-headers.grid-headers .header-bit-value {
+    /* 8 4 2 1 labels */
+    font-size: 0.6em;
+    height: 20px;
+    /* Should match .bit height */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#clock {
+    /* This will be styled by JS based on mode */
+    font-size: 2em;
+    /* Base for bit size reference, actual size by .bit */
+    gap: 10px;
+    /* JS will set display: flex or display: grid */
+}
+
+#clock.row-mode {
+    /* Styles for 6x3 Row Mode */
+    display: flex;
+    flex-direction: column;
+}
+
+#clock.row-mode .row {
+    display: flex;
+    gap: 5px;
+}
+
+#clock.grid-mode {
+    /* Styles for 6x4 Grid Mode */
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    /* 6 digits HHMMSS */
+    /* grid-template-rows dynamically set if headers are inside or fixed 4 */
+    gap: 5px;
+}
+
+.bit {
+    width: 20px;
+    height: 20px;
+    background: var(--inactive-bit-color);
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+.bit.on {
+    background: var(--active-bit-color);
+}
+
+/* ... (keep existing styles) ... */
+
+.clock-display-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* Center the whole clock block */
+    gap: 5px;
+    margin-top: 10px;
+    width: fit-content;
+}
+
+.bit-headers {
+    /* This is #clockHeadersTop */
+    display: flex;
+    gap: 5px;
+    font-size: 0.7em;
+    color: var(--text-color);
+    min-height: 1.2em;
+    /* Ensure space even if empty */
+    justify-content: center;
+    /* Center the headers */
+    width: 100%;
+    /* Take full width of its parent (.clock-display-area) */
+    box-sizing: border-box;
+}
+
+.bit-headers.grid-headers-top {
+    /* For H1 H2 M1 M2 S1 S2 */
+    display: grid;
+    /* Will be 1 row, 6 columns */
+    grid-template-columns: repeat(6, 1fr);
+    gap: 5px;
+    justify-items: center;
+    width: auto;
+    padding: 0 calc((100% - (6 * 20px + 5 * 5px)) / 2);
+}
+
+.bit-headers.grid-headers-top .header-bit {
+    width: 20px;
+    text-align: center;
+}
+
+.bit-headers.row-mode-top .header-bit {
+    width: 20px;
+    text-align: center;
+}
+
+.clock-main-content {
+    display: flex;
+    flex-direction: row;
+    /* For 6x4 mode with left labels */
+    gap: 10px;
+    /* Gap between left labels and clock bits */
+    align-items: flex-start;
+    /* Align top of labels with top of clock grid */
+}
+
+.bit-labels-left {
+    /* For 8,4,2,1 labels in 6x4 mode */
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    /* Matches bit gap */
+    font-size: 0.7em;
+    color: var(--text-color);
+    padding-top: 2px;
+    /* Align with first row of bits visually */
+}
+
+.bit-labels-left.grid-mode-left {}
+
+.bit-labels-left .label-bit-value {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 5px;
+}
+
+/* This is the main #clock div */
+.clock-core {
+    gap: 5px;
+}
+
+.clock-core.row-mode {
+    display: flex;
+    flex-direction: column;
+}
+
+.clock-core.row-mode .row {
+    display: flex;
+    gap: 5px;
+}
+
+.clock-core.grid-mode {
+    display: grid;
+    grid-template-columns: repeat(6, 20px);
+    grid-template-rows: repeat(4, 20px);
+    gap: 5px;
+}
+
+.bit-labels-bottom {
+    display: flex;
+    /* flex-direction: column; /* Default, but for row mode we want H M S side-by-side under the clock */
+    flex-direction: row;
+    /* Change for row mode to be side by side */
+    gap: 10px;
+    /* Space between H M S */
+    font-size: 0.7em;
+    color: var(--text-color);
+    /* align-items: flex-end; */
+    justify-content: center;
+    /* Center the H M S labels */
+    width: 100%;
+    /* Take full width to allow centering */
+    margin-top: 5px;
+    /* Space above the H M S labels */
+    min-height: 1.2em;
+    /* Ensure space even if empty */
+}
+
+.bit-labels-bottom.row-mode-bottom {
+    /* Specific styles for H M S for 6x3 */
+    /* If H, M, S are to be vertically aligned with each row of bits in 6x3,
+       this approach won't work. They'd need to be inside .clock-main-content
+       and styled with `flex-direction: column` and aligned next to the `clock-core.row-mode`.
+       The current JS puts H M S into .bit-labels-bottom, so they appear under the whole 6x3 block.
+    */
+    /* To make H M S appear stacked vertically *below* the clock: */
+    flex-direction: column;
+    align-items: center;
+    /* Center them vertically if stacked */
+    gap: 0px;
+    /* Reduce gap if stacked closely */
+
+}
+
+.bit-labels-bottom .label-time-part {
+    height: 20px;
+    display: flex;
+    align-items: center;
+    /* padding-left: 5px; -- handled by gap now */
+}
+
+.bit {
+    width: 20px;
+    height: 20px;
+    background: var(--inactive-bit-color);
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+.bit.on {
+    background: var(--active-bit-color);
+}
