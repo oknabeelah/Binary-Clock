@@ -454,6 +454,11 @@ body {
         display: block; /* Stack radio buttons vertically for more space */
         margin-bottom: 5px;
     }
+    .bit {
+        width: 15px;
+        height: 15px;
+        border-radius: 3px; /* <<<< ADJUSTED: Reduce border-radius */
+    }
 }
 
 /* Optional: Even smaller screens, if needed */
@@ -498,4 +503,10 @@ body {
     .bit-labels-bottom {
         font-size: 0.55em;
     }
+    .bit {
+        width: 12px;
+        height: 12px;
+        border-radius: 2px; /* <<<< ADJUSTED: Further reduce border-radius */
+    }
+
 }
