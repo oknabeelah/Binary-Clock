@@ -206,7 +206,7 @@ body {
     /* Center the whole clock block */
     gap: 5px;
     margin-top: 10px;
-    width: fit-content;
+    width: auto;
 }
 
 .bit-headers {
@@ -219,7 +219,7 @@ body {
     /* Ensure space even if empty */
     justify-content: center;
     /* Center the headers */
-    width: 100%;
+    /*width: 100%; */
     /* Take full width of its parent (.clock-display-area) */
     box-sizing: border-box;
 }
@@ -263,7 +263,7 @@ body {
     /* Matches bit gap */
     font-size: 0.7em;
     color: var(--text-color);
-    padding-top: 2px;
+    /* padding-top: 2px; */
     /* Align with first row of bits visually */
 }
 
@@ -297,24 +297,24 @@ body {
     display: grid;
     grid-template-columns: repeat(6, 20px);
     grid-template-rows: repeat(4, 20px);
-    gap: 5px;
+    /*gap: 5px; */
 }
 
 .bit-labels-bottom {
     display: flex;
     /* flex-direction: column; /* Default, but for row mode we want H M S side-by-side under the clock */
-    flex-direction: row;
+    flex-direction: column;
     /* Change for row mode to be side by side */
-    gap: 10px;
+    gap: 5px;
     /* Space between H M S */
     font-size: 0.7em;
     color: var(--text-color);
     /* align-items: flex-end; */
     justify-content: center;
     /* Center the H M S labels */
-    width: 100%;
+    /* width: 100%; */
     /* Take full width to allow centering */
-    margin-top: 5px;
+    /* margin-top: 5px; */
     /* Space above the H M S labels */
     min-height: 1.2em;
     /* Ensure space even if empty */
@@ -328,10 +328,10 @@ body {
        The current JS puts H M S into .bit-labels-bottom, so they appear under the whole 6x3 block.
     */
     /* To make H M S appear stacked vertically *below* the clock: */
-    flex-direction: column;
+    /* flex-direction: column; */
     align-items: center;
     /* Center them vertically if stacked */
-    gap: 0px;
+    /* gap: 0px; */
     /* Reduce gap if stacked closely */
 
 }
@@ -397,11 +397,15 @@ body {
         width: 15px;  /* Reduce bit width */
         height: 15px; /* Reduce bit height */
     }
+    .bit { /* Specifically for the bit's border-radius */
+        border-radius: 3px;
+    }
+
     /* If using Option 1, also adjust grid column/row templates if they use fixed px values based on bits */
     .clock-core.grid-mode {
         grid-template-columns: repeat(6, 15px); /* Match new bit width */
         grid-template-rows: repeat(4, 15px);    /* Match new bit height */
-        gap: 3px; /* Optionally reduce gap */
+        /* gap: 3px; */ /* Optionally reduce gap */
     }
     .clock-core.row-mode .row,
     .bit-headers, /* For top headers in row mode or grid mode */
@@ -410,14 +414,19 @@ body {
         gap: 3px; /* Optionally reduce gap */
     }
     #clockHeadersTop.grid-headers-top {
+        /* display: grid; */
         grid-template-columns: repeat(6, 15px); /* Match new bit width */
-        gap: 3px;
+        /* gap: 5px; */
     }
      .bit-headers.grid-headers-top .header-bit { /* Already covered by general .header-bit */
         /* width: 15px; */
+        width: 15px; /* Ensure it takes the full cell width */
+        text-align: center;
     }
      .bit-headers.row-mode-top .header-bit {  /* Already covered by general .header-bit */
         /* width: 15px; */
+        width: 15px; /* Should match .bit width */
+        text-align: center;
     }
     .bit-labels-left .label-bit-value {
         height: 15px; /* Match new bit height */
@@ -479,10 +488,12 @@ body {
         width: 12px;
         height: 12px;
     }
+    .bit { /* Specifically for the bit's border-radius */
+        border-radius: 2px;
+    }
     .clock-core.grid-mode {
         grid-template-columns: repeat(6, 12px);
         grid-template-rows: repeat(4, 12px);
-        gap: 2px;
     }
     .clock-core.row-mode .row,
     .bit-headers,
@@ -492,7 +503,6 @@ body {
     }
     #clockHeadersTop.grid-headers-top {
         grid-template-columns: repeat(6, 12px);
-        gap: 2px;
     }
     .bit-labels-left .label-bit-value,
     .bit-labels-bottom .label-time-part {
