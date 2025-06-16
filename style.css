@@ -354,3 +354,148 @@ body {
 .bit.on {
     background: var(--active-bit-color);
 }
+
+
+@media (max-width: 600px) {
+    :root { /* Or a more specific selector if variables are scoped differently */
+        --bit-size: 15px;
+        --bit-gap: 3px;
+    }
+    body {
+        /* Allow scrolling if content overflows slightly on very small screens,
+           though we aim to prevent this. */
+        overflow-x: hidden; 
+    }
+
+    .container {
+        min-width: 90vw; /* Use viewport width percentage */
+        max-width: 95vw; /* Ensure it doesn't get too wide even if min-width is met */
+        padding: 15px; /* Slightly reduce padding */
+        margin: 10px 0; /* Add some vertical margin */
+    }
+
+    .title {
+        font-size: 1.3em; /* Slightly reduce title size */
+    }
+
+    .settings-icon {
+        font-size: 1.3em; /* Match title reduction */
+    }
+
+    .settings-panel {
+        font-size: 0.9em; /* Reduce font size in settings for more space */
+    }
+    .settings-panel select,
+    .settings-panel input[type="checkbox"] {
+        padding: 6px; /* Slightly smaller padding */
+    }
+    /* Adjust bit and header sizes for smaller screens */
+    /* Option 1: Fixed smaller size (simpler) */
+    .bit,
+    .bit-headers .header-bit,
+    .bit-labels-left .label-bit-value {
+        width: 15px;  /* Reduce bit width */
+        height: 15px; /* Reduce bit height */
+    }
+    /* If using Option 1, also adjust grid column/row templates if they use fixed px values based on bits */
+    .clock-core.grid-mode {
+        grid-template-columns: repeat(6, 15px); /* Match new bit width */
+        grid-template-rows: repeat(4, 15px);    /* Match new bit height */
+        gap: 3px; /* Optionally reduce gap */
+    }
+    .clock-core.row-mode .row,
+    .bit-headers, /* For top headers in row mode or grid mode */
+    .bit-labels-left,
+    .bit-labels-bottom {
+        gap: 3px; /* Optionally reduce gap */
+    }
+    #clockHeadersTop.grid-headers-top {
+        grid-template-columns: repeat(6, 15px); /* Match new bit width */
+        gap: 3px;
+    }
+     .bit-headers.grid-headers-top .header-bit { /* Already covered by general .header-bit */
+        /* width: 15px; */
+    }
+     .bit-headers.row-mode-top .header-bit {  /* Already covered by general .header-bit */
+        /* width: 15px; */
+    }
+    .bit-labels-left .label-bit-value {
+        height: 15px; /* Match new bit height */
+    }
+    .bit-labels-bottom .label-time-part {
+        height: 15px; /* Match new bit height */
+    }
+
+
+    /* Option 2: Using CSS variables for bit size (more advanced, allows dynamic JS changes too) */
+    /* If you choose this, define --bit-size and --bit-gap in :root and use them everywhere,
+       then just change the variable values here.
+       Example:
+       :root { --bit-size: 20px; --bit-gap: 5px; }
+       .bit { width: var(--bit-size); height: var(--bit-size); }
+       #clock.grid-mode { grid-template-columns: repeat(6, var(--bit-size)); gap: var(--bit-gap); }
+       
+       In media query:
+       :root { --bit-size: 15px; --bit-gap: 3px; }
+    */
+
+    /* Adjust font sizes for labels if they become too cramped */
+    .bit-headers,
+    .bit-labels-left,
+    .bit-labels-bottom {
+        font-size: 0.6em; /* Slightly smaller label font */
+    }
+
+    /* If the settings panel content is too wide */
+    .settings-panel fieldset {
+        padding: 8px;
+    }
+    .settings-panel .radio-group label {
+        display: block; /* Stack radio buttons vertically for more space */
+        margin-bottom: 5px;
+    }
+}
+
+/* Optional: Even smaller screens, if needed */
+@media (max-width: 400px) {
+    .container {
+        padding: 10px;
+    }
+    .title {
+        font-size: 1.1em;
+    }
+    .settings-icon {
+        font-size: 1.1em;
+    }
+
+    .bit,
+    .bit-headers .header-bit,
+    .bit-labels-left .label-bit-value {
+        width: 12px;
+        height: 12px;
+    }
+    .clock-core.grid-mode {
+        grid-template-columns: repeat(6, 12px);
+        grid-template-rows: repeat(4, 12px);
+        gap: 2px;
+    }
+    .clock-core.row-mode .row,
+    .bit-headers,
+    .bit-labels-left,
+    .bit-labels-bottom {
+        gap: 2px;
+    }
+    #clockHeadersTop.grid-headers-top {
+        grid-template-columns: repeat(6, 12px);
+        gap: 2px;
+    }
+    .bit-labels-left .label-bit-value,
+    .bit-labels-bottom .label-time-part {
+        height: 12px;
+    }
+    .bit-headers,
+    .bit-labels-left,
+    .bit-labels-bottom {
+        font-size: 0.55em;
+    }
+}
